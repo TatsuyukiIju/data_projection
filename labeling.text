@@ -1,0 +1,16 @@
+KFold:5, training data size : unlabeled data size = 33.333333%:66.666667%,        number of each data samples per fold:[train, unlabeled, test]=        [15,30,40],num_of_features:185,hyperparameter:{'kernel': 'linear', 'max_iter': -1, 'verbose': False, 'random_state': None, 'degree': 3, 'cache_size': 200, 'class_weight': None, 'shrinking': True, 'tol': 0.001, 'coef0': 0.0, 'probability': True, 'C': 1000, 'gamma': 0.0}
+threshold,fold,num_train,num_unlabeled,num_test,precision:under30,precision:over30,        recall:under30,recall:over30,F_score:under30,F_score:over30,support:under30,support:over30,        precision_mean,recall,F_score_mean,num_of_labeledUnlabeled
+for fold 0
+0.7,0,39,30,40,0.75,0.727272727273,0.75,0.727272727273,0.75,0.727272727273,12,11,0.738636363636,0.738636363636,0.738636363636,7for fold 1
+KFold:5, training data size : unlabeled data size = 33.333333%:66.666667%,        number of each data samples per fold:[train, unlabeled, test]=        [15,30,40],num_of_features:185,hyperparameter:{'kernel': 'linear', 'max_iter': -1, 'verbose': False, 'random_state': None, 'degree': 3, 'cache_size': 200, 'class_weight': None, 'shrinking': True, 'tol': 0.001, 'coef0': 0.0, 'probability': True, 'C': 1000, 'gamma': 0.0}
+threshold,fold,num_train,num_unlabeled,num_test,precision:under30,precision:over30,        recall:under30,recall:over30,F_score:under30,F_score:over30,support:under30,support:over30,        precision_mean,recall,F_score_mean,num_of_labeledUnlabeled
+for fold 0
+0.75,0,44,30,40,0.666666666667,0.590909090909,0.307692307692,0.866666666667,0.421052631579,0.702702702703,13,15,0.628787878788,0.587179487179,0.561877667141,2for fold 1
+0.75,1,41,30,40,0.47619047619,0.5,0.833333333333,0.153846153846,0.606060606061,0.235294117647,12,13,0.488095238095,0.49358974359,0.420677361854,5for fold 2
+KFold:5, training data size : unlabeled data size = 40.000000%:60.000000%,        number of each data samples per fold:[train, unlabeled, test]=        [20,30,40],num_of_features:185,hyperparameter:{'kernel': 'linear', 'max_iter': -1, 'verbose': False, 'random_state': None, 'degree': 3, 'cache_size': 200, 'class_weight': None, 'shrinking': True, 'tol': 0.001, 'coef0': 0.0, 'probability': True, 'C': 1000, 'gamma': 0.0}
+threshold,fold,num_train,num_unlabeled,num_test,precision:under30,precision:over30,        recall:under30,recall:over30,F_score:under30,F_score:over30,support:under30,support:over30,        precision_mean,recall,F_score_mean,num_of_labeledUnlabeled
+for fold 0
+0.7,0,47,30,40,0.7,0.857142857143,0.933333333333,0.5,0.8,0.631578947368,15,12,0.778571428571,0.716666666667,0.715789473684,3for fold 1
+KFold:5, training data size : unlabeled data size = 40.000000%:60.000000%,        number of each data samples per fold:[train, unlabeled, test]=        [20,30,40],num_of_features:185,hyperparameter:{'kernel': 'linear', 'max_iter': -1, 'verbose': False, 'random_state': None, 'degree': 3, 'cache_size': 200, 'class_weight': None, 'shrinking': True, 'tol': 0.001, 'coef0': 0.0, 'probability': True, 'C': 1000, 'gamma': 0.0}
+threshold,fold,num_train,num_unlabeled,num_test,precision:under30,precision:over30,        recall:under30,recall:over30,F_score:under30,F_score:over30,support:under30,support:over30,        precision_mean,recall,F_score_mean,num_of_labeledUnlabeled
+for fold 0
