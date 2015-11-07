@@ -1,7 +1,7 @@
 #-*- coding: utf-8 -*-
 __author__ = 'k148582'
 import pymongo as pm
-import pymongo_utill, time , warnings
+import pymongo_utill, time , warnings, os, errno
 import numpy as np
 from sklearn.cross_validation import train_test_split
 from sklearn.grid_search import GridSearchCV
@@ -11,6 +11,7 @@ from sklearn.feature_selection import SelectKBest, chi2
 from feature_extraction import WordVectorizer
 from sklearn.cross_validation import StratifiedKFold, StratifiedShuffleSplit
 import matplotlib.pyplot as plt
+
 
 
 def semi_supervised(clf, num_folds, raito_train, th, user_sequence, raito_unlabeled, svsvm, semi_svsvm, labeling, k):
@@ -210,6 +211,14 @@ if __name__ == '__main__':
     """
 
 
+    path = "./experiment_11_7"
+    try:
+        os.makedev(path)
+    except OSError as exception:
+        if exception.errno != errno.EEXIST:
+            raise
+        else:
+            print("\nBE CAREFUL! Directory %s already exists." % path)
 
     svsvm = open("svsvm_11_5.text", "w")
     semi_svsvm = open("semi_svsvm_11_5.text", "w")
