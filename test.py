@@ -3,6 +3,7 @@ __author__ = 'k148582'
 import pymongo as pm
 import pymongo_utill, time , warnings, os, errno
 import numpy as np
+import numpy.ma as ma
 from sklearn.cross_validation import train_test_split
 from sklearn.grid_search import GridSearchCV
 from sklearn.metrics import classification_report, precision_recall_fscore_support
@@ -25,18 +26,6 @@ def semi_supervised(clf, num_folds, raito_train, th, user_sequence, raito_unlabe
     else:
         num_of_train = raito_train
         num_of_unlabeled = raito_unlabeled
-
-    #f.write("[recall:[under30, over30], precision:[under30, over30], F-1:[under30, over30], support:[under30, over30]]\n")
-    """
-    for f in [svsvm, semi_svsvm, labeling]:
-        f.write("KFold:{0:d}, training data size : unlabeled data size = {1:f}%:{2:f}%,\
-        number of each data samples per fold:[train, unlabeled, test]=\
-        [{3:d},{4:d},{5:d}],num_of_features:{6:s},hyperparameter:{7:s}\n".format(num_folds, 100 * (raito_train/(raito_train + raito_unlabeled)),
-                                        100 * (raito_unlabeled/(raito_train + raito_unlabeled)),
-                                        num_of_train, num_of_unlabeled, num_of_test,
-                                        str(k), str(clf.get_params())))
-    """
-
 
     svlearning_aggregate = np.zeros(3)
     semi_svlearning_aggregate = np.zeros(3)
@@ -71,14 +60,7 @@ def semi_supervised(clf, num_folds, raito_train, th, user_sequence, raito_unlabe
                     .format(str(th), str(i), str(raito_train), str(raito_unlabeled), str(len(test)), str(scores[0][0]),
                             str(scores[0][1]), str(scores[1][0]), str(scores[1][1]), str(scores[2][0]), str(scores[2][1]),
                             str(scores[3][0]), str(scores[3][1]), str(scores_mean[0]), str(scores_mean[1]), str(scores_mean[2])))
-        """
-        f.write(str(precision_recall_fscore_support(y_pred=clf.predict(X=feature_vectors[test]),
-                                                    y_true=user_sequence.labels[test]))+"\n")
-        supervised_svm_score_mean = precision_recall_fscore_support(y_pred=clf.predict(X=feature_vectors[test]),
-                                                                    y_true=user_sequence.labels[test], average='macro', pos_label=None)
-        svlearning_aggregate += supervised_svm_score_mean[:3]
-        f.write("mean:" + str(supervised_svm_score_mean) + "\n\n")
-        """
+
 
         #Semi-SuperVisedLearning Process
         init_unlabeled_sample_size = len(unLabeled)
@@ -118,24 +100,6 @@ def semi_supervised(clf, num_folds, raito_train, th, user_sequence, raito_unlabe
                                  str(scores[3][0]), str(scores[3][1]), str(scores_mean[0]), str(scores_mean[1]),
                                  str(scores_mean[2]), str(result_unlabeled_sample_size)))
 
-        """
-        f.write("self-training svm score\n")
-        f.write(str(precision_recall_fscore_support(y_pred=clf.predict(X=feature_vectors[test]),
-                                                    y_true=user_sequence.labels[test]))+"\n")
-
-        semi_supervised_svm_score_mean = precision_recall_fscore_support(y_pred=clf.predict(X=feature_vectors[test]),
-                                                                         y_true=user_sequence.labels[test], average="macro", pos_label=None)
-        semi_svlearning_aggregate += semi_supervised_svm_score_mean[:3]
-        f.write("mean" + str(semi_supervised_svm_score_mean) + "\n\n")
-        f.write("collectly labeled sample score\n")
-
-        f.write(str(precision_recall_fscore_support(y_pred=predicted_labels[labeled_unlabeled],
-                                                    y_true=user_sequence.labels[labeled_unlabeled])) + "\n")
-        colletly_labeled_sample_score_mean = precision_recall_fscore_support(y_pred=predicted_labels[labeled_unlabeled],
-                                                                             y_true=user_sequence.labels[labeled_unlabeled], average="macro", pos_label=None)
-        f.write("mean" + str(colletly_labeled_sample_score_mean) + "\n\n")
-        collectly_labeled_aggregate += colletly_labeled_sample_score_mean[:3]
-        """
 
         scores = precision_recall_fscore_support(y_pred=predicted_labels[labeled_unlabeled],
                                                  y_true=user_sequence.labels[labeled_unlabeled])
@@ -148,25 +112,48 @@ def semi_supervised(clf, num_folds, raito_train, th, user_sequence, raito_unlabe
                                str(scores[3][0]), str(scores[3][1]), str(scores_mean[0]), str(scores_mean[1]),
                                str(scores_mean[2]), str(result_unlabeled_sample_size)))
 
-    """
-        result_unlabeled_sample_size = len(unLabeled)
-        size[i] = (1-(float(result_unlabeled_sample_size/init_unlabeled_sample_size)))
 
-    f.write("mean of each metric for thresh hold:{0:s}, KFold:{1:d}, training data size : unlabeled data size = {2:d}%:{3:d}%,\
-     number of each data samples per fold:[train, unlabeled, test]=[{4:d},{5:d},{6:d}]\n\n".format(str(th), num_folds, int((100*raito_train)),
-                                                                                                   int(100*(1-raito_train)), num_of_train, num_of_unlabeled, num_of_test))
+def self_training(X, y, X_unLabeled, clf):
 
-    f.write("supervised svm: %s\n" % str((svlearning_aggregate/num_folds)))
-    f.write("self-training svm: %s\n" % str((semi_svlearning_aggregate/num_folds)))
-    f.write("correctly labeled sample: %s\n" % str((collectly_labeled_aggregate/num_folds)))
-    f.write("labeled unlabeled sample/UnLabeled sample: %s\n" % size.mean())
-    f.write("\n\n")
-    """
+    clf.fit(x=X, y=y)
+    index_unlabeled = ma.arange(0, len(X_unLabeled), 1)
+    y_labeled = np.zeros(len(X_unLabeled))
+    TrainIsFailed = False
+
+    while True:
+        probs = clf.predict_proba(X=X_unLabeled[index_unlabeled])
+        index_greater_equal = np.greater_equal([max(d) for d in probs], [th]*len(probs))
+
+        if not len(index_greater_equal) > 0:
+            if index_unlabeled.mask == ma.masked:
+                TrainIsFailed = True
+            break
+
+        y_labeled[index_unlabeled[index_greater_equal]] = [np.argmax(p) for p in probs[index_greater_equal]]
+        index_unlabeled[index_greater_equal] = ma.masked
+
+        clf.fit(X=np.append(X, X_unLabeled[~index_unlabeled]),
+                y=np.append(y, y_labeled[~index_unlabeled]))
+
+    if TrainIsFailed:
+        y_labeled = []
+
+    return clf, y_labeled
+
+
+def get_scores(y_pred, y_true):
+    scores = precision_recall_fscore_support(y_true=y_true, y_pred=y_pred)
+    average = precision_recall_fscore_support(y_true=y_true, y_pred=y_pred, average="macro", pos_label=None)
+
+    return scores, average
+
 
 if __name__ == '__main__':
 
     star_time = time.time()
     user_sequence = pymongo_utill.TwitterUserSequence()
+    ths = [0.7, 0.75, 0.8, 0.85, 0.9, 0.95]
+    train_size = [25, 50, 75, 155, 255]
 
     query = [{"$and": [{"age": {"$lt": 30}},
                       {"age": {"$gte": 13}}], "num": 1200},
@@ -175,6 +162,48 @@ if __name__ == '__main__':
 
     user_sequence.make_user_sequence(query=query)
 
+    selector = SelectKBest(chi2, k=185)
+    svm = SVC(kernel='linear', probability=True, C=1000)
+
+    for size in train_size:
+        ssf = StratifiedShuffleSplit(y=user_sequence.labels, n_iter=5, random_state=0, test_size=480)
+
+        for i, (labeled_index, test_index) in enumerate(ssf):
+            train_index, unLabeled_index = StratifiedShuffleSplit(
+                                                                    y=user_sequence.labels[labeled_index],
+                                                                    train_size=size,
+                                                                    random_state=0
+                                                                 )._iter_indices().__next__()
+            user_sequence.set_word_set(index=train_index)
+            feature_vectors = user_sequence.transform()
+            selector.fit(
+                            X=feature_vectors[train_index],
+                            y=user_sequence.labels[train_index]
+                        )
+
+            feature_vectors = selector.transform(X=feature_vectors)
+
+            svm.fit(
+                        X=feature_vectors[train_index],
+                        y=user_sequence.labels[train_index]
+                   )
+            scores, average = get_scores(
+                                            y_pred=svm.predict(X=feature_vectors[test_index]),
+                                            y_true=user_sequence.labels[test_index]
+                                        )
+
+            for th in ths:
+                semi_svm = self_training(
+                                            X=feature_vectors[train_index],
+                                            y=user_sequence.labels[train_index],
+                                            X_unLabeled=feature_vectors[unLabeled_index],
+                                            clf=SVC(kernel='linear', probability=True, C=1000),
+                                            th=th
+                                     )
+                scores, average = get_scores(
+                                                y_pred=semi_svm.predict(X=feature_vectors[test_index]),
+                                                y_true=user_sequence.labels[test_index]
+                                            )
     """
     n_iter = 5
     num_train = [15, 75, 150, 225, 290, 375, 450, 525, 600]
