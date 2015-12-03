@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/data_projection.iml" filepath="$PROJECT_DIR$/data_projection.iml" />
+      <module fileurl="file://$PROJECT_DIR$/plot_decision_boundary/plot_decision_boundary.iml" filepath="$PROJECT_DIR$/plot_decision_boundary/plot_decision_boundary.iml" />
       <module fileurl="file://$PROJECT_DIR$/test/test.iml" filepath="$PROJECT_DIR$/test/test.iml" />
     </modules>
   </component>
